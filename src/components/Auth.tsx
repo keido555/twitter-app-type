@@ -32,7 +32,6 @@ import CameraIcon from "@material-ui/icons/Camera";
 import EmailIcon from "@material-ui/icons/Email";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
-import { AlarmTwoTone } from "@material-ui/icons";
 
 function getModalStyle() {
   const top = 50;
@@ -71,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.secondary.main,
   },
   form: {
-    width: "100%", // Fix IE 11 issue.
+    width: "100%",
     marginTop: theme.spacing(1),
   },
   submit: {

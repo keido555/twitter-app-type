@@ -59,11 +59,11 @@ const Post: React.FC<PROPS> = (props) => {
 
   useEffect(() => {
     const q = query(
-      collection(db, "post", props.postId, "comments"),
+      collection(db, "posts", props.postId, "comments"),
       orderBy("timestamp", "desc")
     );
     const unSub = onSnapshot(q, (snapshot: any) => {
-      setComment(
+      setComments(
         snapshot.docs.map((doc: any) => ({
           id: doc.id,
           avatar: doc.data().avatar,

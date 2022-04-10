@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { Avatar, Button, IconButton } from "@material-ui/core";
-import { AddAPhoto } from "@material-ui/icons";
+import AddAPhotoIcon from "@material-ui/icons/AddAPhoto";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
@@ -41,7 +41,6 @@ const TweetInput: React.FC = () => {
           alert(err.message);
         },
         async () => {
-          //Firebase ver9 compliant
           await getDownloadURL(ref(storage, `images/${fileName}`)).then(
             async (url) => {
               addDoc(collection(db, "posts"), {
@@ -89,7 +88,7 @@ const TweetInput: React.FC = () => {
           />
           <IconButton>
             <label>
-              <AddAPhoto
+              <AddAPhotoIcon
                 className={
                   tweetImage ? styles.tweet_addIconLoaded : styles.tweet_addIcon
                 }
