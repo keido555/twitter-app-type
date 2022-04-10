@@ -62,9 +62,9 @@ const Post: React.FC<PROPS> = (props) => {
       collection(db, "posts", props.postId, "comments"),
       orderBy("timestamp", "desc")
     );
-    const unSub = onSnapshot(q, (snapshot: any) => {
+    const unSub = onSnapshot(q, (snapshot) => {
       setComments(
-        snapshot.docs.map((doc: any) => ({
+        snapshot.docs.map((doc) => ({
           id: doc.id,
           avatar: doc.data().avatar,
           text: doc.data().text,

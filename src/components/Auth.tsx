@@ -104,7 +104,7 @@ const Auth: React.FC = () => {
         setOpenModal(false);
         setResetEmail("");
       })
-      .catch((err: any) => {
+      .catch((err) => {
         alert(err.message);
         setResetEmail("");
       });
@@ -154,9 +154,7 @@ const Auth: React.FC = () => {
   };
 
   const signInGoogle = async () => {
-    await signInWithPopup(auth, provider).catch((err: any) =>
-      alert(err.message)
-    );
+    await signInWithPopup(auth, provider).catch((err) => alert(err.message));
   };
 
   return (

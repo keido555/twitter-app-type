@@ -42,7 +42,7 @@ const Feed: React.FC = () => {
       <TweetInput />
       {posts[0]?.id && (
         <>
-          {posts.map((post) => {
+          {posts.forEach((post) => {
             <Post
               key={post.id}
               postId={post.id}
@@ -52,6 +52,7 @@ const Feed: React.FC = () => {
               timestamp={post.timestamp}
               username={post.username}
             />;
+            // return posts;
           })}
         </>
       )}
