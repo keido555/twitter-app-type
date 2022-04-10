@@ -4,6 +4,15 @@ import { useDispatch } from "react-redux";
 import { updateUserProfile } from "../features/userSlice";
 import { auth, provider, storage } from "../firebase";
 
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  signInWithPopup,
+  sendPasswordResetEmail,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+
 import {
   Avatar,
   Button,
@@ -91,13 +100,12 @@ const Auth: React.FC = () => {
   const [resetEmail, setResetEmail] = useState("");
 
   const sendResetEmail = async (e: React.MouseEvent<HTMLElement>) => {
-    await auth
-      .sendPasswordResetEmail(resetEmail)
+    await sendPasswordResetEmail(auth, resetEmail)
       .then(() => {
         setOpenModal(false);
         setResetEmail("");
       })
-      .catch((err) => {
+      .catch((err: any) => {
         alert(err.message);
         setResetEmail("");
       });
@@ -111,10 +119,14 @@ const Auth: React.FC = () => {
   };
 
   const signInEmail = async () => {
-    await auth.signInWithEmailAndPassword(email, password);
+    await signInWithEmailAndPassword(auth, email, password);
   };
   const signUpEmail = async () => {
-    const authUser = await auth.createUserWithEmailAndPassword(email, password);
+    const authUser = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     let url = "";
     if (avatarImage) {
       const S =
@@ -125,13 +137,15 @@ const Auth: React.FC = () => {
         .join("");
       const fileName = randomChar + "_" + avatarImage.name;
 
-      await storage.ref(`avatars/${fileName}`).put(avatarImage);
-      url = await storage.ref("avatars").child(fileName).getDownloadURL();
+      await uploadBytes(ref(storage, `avatars/${fileName}`), avatarImage);
+      url = await getDownloadURL(ref(storage, `avatars/${fileName}`));
     }
-    await authUser.user?.updateProfile({
-      displayName: username,
-      photoURL: url,
-    });
+    if (authUser.user) {
+      await updateProfile(authUser.user, {
+        displayName: username,
+        photoURL: url,
+      });
+    }
     dispatch(
       updateUserProfile({
         displayName: username,
@@ -141,7 +155,9 @@ const Auth: React.FC = () => {
   };
 
   const signInGoogle = async () => {
-    await auth.signInWithPopup(provider).catch((err) => alert(err.message));
+    await signInWithPopup(auth, provider).catch((err: any) =>
+      alert(err.message)
+    );
   };
 
   return (
@@ -243,7 +259,7 @@ const Auth: React.FC = () => {
                       try {
                         await signInEmail();
                       } catch (err: any) {
-                        AlarmTwoTone(err.message);
+                        alert(err.message);
                       }
                     }
                   : async () => {

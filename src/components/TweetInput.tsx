@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { Avatar, Button, IconButton } from "@material-ui/core";
 import { AddAPhoto } from "@material-ui/icons";
-import firebase from "firebase/app";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 import styles from "./TweetInput.module.css";
 import { selectUser } from "../features/userSlice";
@@ -28,39 +29,43 @@ const TweetInput: React.FC = () => {
         .map((n) => S[n % S.length])
         .join("");
       const fileName = randomChar + "_" + tweetImage.name;
-      const uploadTweetImg = storage.ref(`images/${fileName}`).put(tweetImage);
+      const uploadTweetImg = uploadBytesResumable(
+        ref(storage, `images/${fileName}`),
+        tweetImage
+      );
       uploadTweetImg.on(
-        firebase.storage.TaskEvent.STATE_CHANGED,
+        "state_changed",
 
         () => {},
         (err) => {
           alert(err.message);
         },
         async () => {
-          await storage
-            .ref("images")
-            .child(fileName)
-            .getDownloadURL()
-            .then(async (url) => {
-              await db.collection("posts").add({
+          //Firebase ver9 compliant
+          await getDownloadURL(ref(storage, `images/${fileName}`)).then(
+            async (url) => {
+              addDoc(collection(db, "posts"), {
                 avatar: user.photoUrl,
                 image: url,
                 text: tweetMsg,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                timestamp: serverTimestamp(),
                 username: user.displayName,
               });
-            });
+            }
+          );
         }
       );
     } else {
-      db.collection("posts").add({
+      addDoc(collection(db, "posts"), {
         avatar: user.photoUrl,
         image: "",
         text: tweetMsg,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        timestamp: serverTimestamp(),
         username: user.displayName,
       });
     }
+    setTweetImage(null);
+    setTweetMsg("");
   };
 
   return (

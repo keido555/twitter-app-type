@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
-import firebase from "firebase/app";
 import { useSelector } from "react-redux";
 import { Avatar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import MessageIcon from "@material-ui/icons/Message";
 import SendIcon from "@material-ui/icons/Send";
+import {
+  collection,
+  query,
+  onSnapshot,
+  orderBy,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 import styles from "./Post.module.css";
 import { db } from "../firebase";
@@ -51,23 +58,21 @@ const Post: React.FC<PROPS> = (props) => {
   const [openComments, setOpenComments] = useState(false);
 
   useEffect(() => {
-    const unSub = db
-      .collection("posts")
-      .doc(props.postId)
-      .collection("comments")
-      .orderBy("timestamp", "desc")
-      .onSnapshot((snapshot) => {
-        setComments(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            avatar: doc.data().avatar,
-            text: doc.data().text,
-            username: doc.data().username,
-            timestamp: doc.data().timestamp,
-          }))
-        );
-      });
-
+    const q = query(
+      collection(db, "post", props.postId, "comments"),
+      orderBy("timestamp", "desc")
+    );
+    const unSub = onSnapshot(q, (snapshot: any) => {
+      setComment(
+        snapshot.docs.map((doc: any) => ({
+          id: doc.id,
+          avatar: doc.data().avatar,
+          text: doc.data().text,
+          username: doc.data().username,
+          timestamp: doc.data().timestamp,
+        }))
+      );
+    });
     return () => {
       unSub();
     };
@@ -75,10 +80,10 @@ const Post: React.FC<PROPS> = (props) => {
 
   const newComment = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    db.collection("posts").doc(props.postId).collection("comments").add({
+    addDoc(collection(db, "posts", props.postId, "comments"), {
       avatar: user.photoUrl,
       text: comment,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      timestamp: serverTimestamp(),
       username: user.displayName,
     });
     setComment("");
@@ -108,12 +113,10 @@ const Post: React.FC<PROPS> = (props) => {
             <img src={props.image} alt="tweet" />
           </div>
         )}
-
         <MessageIcon
           className={styles.post_commentIcon}
           onClick={() => setOpenComments(!openComments)}
         />
-
         {openComments && (
           <>
             {comments.map((com) => (

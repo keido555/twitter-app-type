@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { onAuthStateChanged } from "firebase/auth";
 
 import styles from "./App.module.css";
 import Auth from "./components/Auth";
@@ -12,7 +13,7 @@ const App: React.FC = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const unSub = auth.onAuthStateChanged((authUser) => {
+    const unSub = onAuthStateChanged(auth, (authUser) => {
       if (authUser) {
         dispatch(
           login({
